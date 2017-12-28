@@ -3,10 +3,13 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import VueLazyload from 'vue-lazyload'
 
 import '@/common/stylus/index.styl'
 
 Vue.config.productionTip = true
+
+Vue.use(VueLazyload)
 
 /* eslint-disable no-new */
 new Vue({
