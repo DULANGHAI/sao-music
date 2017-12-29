@@ -2,6 +2,18 @@
   <div class="recommend" ref="recommend">
     <scroll class="recommend-content" ref="scroll" :data="discList">
       <div>
+        <!-- 轮播图部分 -->
+       <div v-if="recommends.length" class="slider-wrapper" ref="sliderWrapper">
+         <slider>
+           <div v-for="(item, index) in recommends" :key="index">
+             <a :href="item.linkUrl">
+               <img @load="loadImage" :src="item.picUrl" alt="">
+             </a>
+           </div>
+         </slider>
+       </div>
+
+        <!-- 歌单部分 -->
         <div class="recommend-list">
           <h1 class="list-title">热门歌单推荐</h1>
           <ul>
@@ -17,20 +29,28 @@
           </ul>
         </div>
       </div>
+      <div class="loading-container" v-show="!discList.length">
+        <loading></loading>
+      </div>
     </scroll>
   </div>
 </template>
 
 <script>
 import Scroll from '@/base/scroll/scroll'
+import Slider from '@/base/slider/slider'
+import Loading from '@/base/loading/loading'
 import {getDiscList, getRecommend} from '@/api/recommend'
 
 export default {
   components: {
-    Scroll
+    Scroll,
+    Slider,
+    Loading
   },
   data () {
     return {
+      recommends: [],
       discList: []
     }
   },
@@ -39,14 +59,26 @@ export default {
     this._getRecommend()
   },
   methods: {
+    loadImage () {
+      if (!this.checkloaded) {
+        this.checkloaded = true
+        setTimeout(() => {
+          this.$refs.scroll.refresh()
+        })
+      }
+    },
     _getDiscList () {
       getDiscList().then(res => {
-        this.discList = res.data.list
+        if (res.code === 0) {
+          this.discList = res.data.list
+        }
       })
     },
     _getRecommend () {
       getRecommend().then(res => {
-        console.log('getRecommend', res)
+        if (res.code === 0) {
+          this.recommends = res.data.slider
+        }
       })
     }
   }
@@ -67,15 +99,7 @@ export default {
       .slider-wrapper
         position: relative
         width: 100%
-        height: 0
-        padding-top: 40%
         overflow: hidden
-        .slider-content
-          position: absolute
-          top: 0
-          left: 0
-          width: 100%
-          height: 100%
       .recommend-list
         .list-title
           height: 65px
@@ -110,5 +134,4 @@ export default {
         width: 100%
         top: 50%
         transform: translateY(-50%)
-
 </style>
